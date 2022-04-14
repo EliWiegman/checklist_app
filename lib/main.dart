@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'globals.dart' as globals;
 
 void main() => runApp(const MyApp());
 
@@ -16,119 +15,14 @@ class MyApp extends StatelessWidget {
         appBar: AppBar(
           title: const Text(title),
         ),
-        body: ListView(
-          shrinkWrap: true,
-          padding: EdgeInsets.all(15.0),
-          children: <Widget>[
-            CheckBoxWrapper(),
-            LabeledCheckbox(label: "stuff", value: false, onChanged: dummy)
-          ],
-        ),
+        body: checklist(),
       ),
     );
   }
 }
 
-bool dummy() {
-  return true;
-}
-
-class CheckBoxWrapper extends StatefulWidget {
-  const CheckBoxWrapper({Key? key}) : super(key: key);
-
-  @override
-  State<CheckBoxWrapper> createState() => _CheckBoxWrapperState();
-}
-
-class _CheckBoxWrapperState extends State<CheckBoxWrapper> {
-  bool isChecked = false;
-
-  @override
-  Widget build(BuildContext context) {
-    Color getColor(Set<MaterialState> states) {
-      const Set<MaterialState> interactiveStates = <MaterialState>{
-        MaterialState.pressed,
-        MaterialState.hovered,
-        MaterialState.focused,
-      };
-      if (states.any(interactiveStates.contains)) {
-        return Colors.blue;
-      }
-      return Colors.red;
-    }
-
-    return Checkbox(
-      checkColor: Colors.white,
-      fillColor: MaterialStateProperty.resolveWith(getColor),
-      value: isChecked,
-      onChanged: (bool? value) {
-        setState(() {
-          isChecked = value!;
-        });
-      },
-    );
-  }
-}
-
-// class LabeledCheckbox extends StatefulWidget {
-//   const LabeledCheckbox(
-//       {Key? key,
-//       this.label = "urmom",
-//       this.value = false,
-//       this.onChanged = globals.dummy()})
-//       : super(key: key);
-
-//   final String label;
-//   final bool value;
-//   final Function onChanged;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return InkWell(
-//       onTap: () {
-//         onChanged(!value);
-//       },
-//       child: Row(
-//         children: <Widget>[
-//           Checkbox(
-//             value: value,
-//             onChanged: (bool? newValue) {
-//               onChanged(newValue);
-//             },
-//           ),
-//           Text(label),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
-// class _LabeledCheckboxState extends State<LabeledCheckbox> {
-//   bool _isSelected = false;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return LabeledCheckbox(
-//       label: 'This is the label text',
-//       //padding: const EdgeInsets.symmetric(horizontal: 20.0),
-//       value: _isSelected,
-//       onChanged: (bool newValue) {
-//         setState(() {
-//           _isSelected = newValue;
-//         });
-//       },
-//     );
-//   }
-// }
-// class CheckBoxWrapper extends StatefulWidget {
-//   const CheckBoxWrapper({Key? key}) : super(key: key);
-
-//   @override
-//   State<CheckBoxWrapper> createState() => _CheckBoxWrapperState();
-// }
-
-class LabeledCheckbox extends StatefulWidget {
-  const LabeledCheckbox({
+class _LabeledCheckboxStateless extends StatelessWidget {
+  const _LabeledCheckboxStateless({
     Key? key,
     required this.label,
     required this.value,
@@ -158,18 +52,30 @@ class LabeledCheckbox extends StatefulWidget {
       ),
     );
   }
-
-  @override
-  State<LabeledCheckbox> createState() => _LabeledCheckboxState();
 }
 
-class _LabeledCheckboxState extends State<LabeledCheckbox> {
+class LabeledCheckbox extends StatefulWidget {
+  const LabeledCheckbox({
+    Key? key,
+    required this.label,
+  }) : super(key: key);
+
+  final String label;
+
+  @override
+  State<LabeledCheckbox> createState() => _LabledCheckbox(this.label);
+}
+
+class _LabledCheckbox extends State<LabeledCheckbox> {
+  _LabledCheckbox(this.label);
+
+  final String label;
   bool _isSelected = false;
 
   @override
   Widget build(BuildContext context) {
-    return LabeledCheckbox(
-      label: 'This is the label text',
+    return _LabeledCheckboxStateless(
+      label: this.label,
       //padding: const EdgeInsets.symmetric(horizontal: 20.0),
       value: _isSelected,
       onChanged: (bool newValue) {
@@ -177,6 +83,55 @@ class _LabeledCheckboxState extends State<LabeledCheckbox> {
           _isSelected = newValue;
         });
       },
+    );
+  }
+}
+
+class checklist extends StatefulWidget {
+  List<String> items = ["ur mom", "test 1", "test 2"];
+  checklist({Key? key}) : super(key: key);
+
+  @override
+  State<checklist> createState() => _checklistState();
+}
+
+class _checklistState extends State<checklist> {
+  Future<void> addTask(BuildContext context) async {}
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: ListView.builder(
+          itemCount: widget.items.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Dismissible(
+                background: Container(
+                  alignment: AlignmentDirectional.centerEnd,
+                  color: Colors.red,
+                  child: const Padding(
+                    padding: EdgeInsets.fromLTRB(0.0, 0.0, 10.0, 0.0),
+                    child: Icon(
+                      Icons.close,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                key: ValueKey<String>(widget.items[index]),
+                direction: DismissDirection.endToStart,
+                onDismissed: (DismissDirection direction) {
+                  setState(() {
+                    widget.items.removeAt(index);
+                  });
+                },
+                child: LabeledCheckbox(label: widget.items[index]));
+          }),
+      floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.add),
+          onPressed: () {
+            setState(() {
+              addTask(context);
+            });
+          }),
     );
   }
 }
