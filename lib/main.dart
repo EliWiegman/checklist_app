@@ -47,7 +47,10 @@ class _LabeledCheckboxStateless extends StatelessWidget {
               onChanged(newValue);
             },
           ),
-          Text(label),
+          !value
+              ? Text(label)
+              : Text(label,
+                  style: TextStyle(decoration: TextDecoration.lineThrough))
         ],
       ),
     );
@@ -96,7 +99,51 @@ class checklist extends StatefulWidget {
 }
 
 class _checklistState extends State<checklist> {
-  Future<void> addTask(BuildContext context) async {}
+  final TextEditingController _textController = TextEditingController();
+  String task = "";
+
+  Future<void> addTask(BuildContext context) async {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+              title: const Text("Add a task: "),
+              content: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    TextField(
+                      onChanged: (value) {
+                        setState(() {
+                          task = value;
+                        });
+                      },
+                    )
+                  ]),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('CANCEL'),
+                  style: TextButton.styleFrom(
+                    primary: Colors.red,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      Navigator.pop(context);
+                    });
+                  },
+                ),
+                TextButton(
+                  child: const Text('ADD'),
+                  onPressed: () {
+                    setState(() {
+                      widget.items.add(task);
+                      Navigator.pop(context);
+                    });
+                  },
+                ),
+              ]);
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
